@@ -1,0 +1,104 @@
+    <section class="content-header">
+      <h1>Virtual Hosts</h1>
+    </section>
+    
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+          	<?php if(!$this->vhosts) {?>
+            	<div class="col-xs-12">
+            	    No results for hosts
+                </div>
+            <?php } else { 
+			$totalsize = 0;?>
+            <!-- /.box-header -->
+            <div class="box-body">
+            <form  action="<?=$this->url('virtualhost/assigncustomer')?>" method="post">
+              <input type="hidden" name="edit" value="<?=$this->SecureKey()?>">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+	              <th></th>
+                  <th>Name</th>
+                  <th>Customer</th>
+                  <th>Directory size</th>
+                  <th>Web Directory size</th>
+                  <th>Backup Directory size</th>
+                  <th>Log size</th>
+                  <th>Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($this->vhosts as $host) {
+					$totalsize +=$host['size'];
+					$totalsize +=$host['size'];
+					$googleFolderId = 0;
+					$vhostid = 0;
+					$dbhostdata = $dbhostservice->findByName(trim($host['name']), true, 'Google Drive');
+					if(!$dbhostdata) {
+						$boxtype = 'box-default';
+					} elseif (count($dbhostdata)==1){
+						$boxtype = 'box-success';
+						$googleFolderId = $dbhostdata[0]['backupkey'];
+						$vhostid = $dbhostdata[0]['id'];
+					} elseif(count($dbhostdata)>1) {
+						$boxtype = 'box-danger';
+					} 
+					
+					if(!$dbhostdata) {
+						$backupstatus = 'Disabled';
+					} elseif (count($dbhostdata)==1 && $dbhostdata[0]['savebackup']){
+						$backupstatus = 'Enabled';
+					} else {
+						$backupstatus = 'Disabled';
+						$boxtype = 'box-warning ';
+					} 
+					?>
+                <tr>
+                  <td style="width:2%;">
+                  	<label><input type="checkbox" class="minimal" name="vhost[]" value="<?php echo $host['name']?>"></label>
+                    <input type="hidden" name="hostingdata[<?php echo $host['name']?>]" value="<?php echo $googleFolderId;?>">
+                    <input type="hidden" name="vhostid[<?php echo $host['name']?>]" value="<?php echo $vhostid;?>">
+                  </td>
+                  <td><?php echo $host['name']?></td>
+                  <td><?php //$customer = $customer->findByName(trim($host['name']));?></td>
+                  <td><?php echo $host['size']?><?php echo $this->configuration['directorysizein']?></td>
+                  <td><?php echo $host['webize']?><?php echo $this->configuration['directorysizein']?></td>
+                  <td><?php echo $host['backupsize']?><?php echo $this->configuration['directorysizein']?></td>
+                  <td><?php echo $host['logsize']?><?php echo $this->configuration['directorysizein']?></td>
+                  <td><?php echo $totalsize?><?php echo $this->configuration['directorysizein']?></td>
+                </tr>
+                <?php } ?>
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Customer</th>
+                  <th>Directory size</th>
+                  <th>Web Directory size</th>
+                  <th>Backup Directory size</th>
+                  <th>Log size</th>
+                  <th>Total</th>
+                </tr>
+                <tr>
+                  <th colspan="5">Action for selected</th>
+                  <th colspan="3">
+                  <select class="form-control select2 pull-left" name="action" style="width: 70%;">
+                  <option value="">Select Action</option>
+                  	<option>Assign Customer</option>
+                  </select>
+                  <button type="submit" class="btn btn-block btn-primary pull-left" style="width: 25%;">Action</button>
+                  </th>
+                </tr>
+                </tfoot>
+              </table>
+            </form>
+            </div>
+            <!-- /.box-body -->
+            <?php } ?>
+          </div>
+          </div>
+      </div>
+    </section>
